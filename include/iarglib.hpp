@@ -12,7 +12,7 @@ namespace iarglib
     class IArger;
 
     // Enum for specifying whether an option requires arguments or not.
-    enum class RequiresArgs
+    enum class RequiresArg
     {
         No,
         Yes
@@ -31,7 +31,7 @@ namespace iarglib
         std::string description;
 
         // Whether or not the option requires arguments.
-        RequiresArgs requiresArgs;
+        RequiresArg requiresArg;
 
         // The function to call when the option is specified.
         void (*func)(const IArger&);
@@ -67,7 +67,7 @@ namespace iarglib
         //     optionName - The name of the option, used to check if it was passed in.
         //     optionDescription - The description of the option, used when displaying help, and not required.
         //     requiresArgs - Whether the option requires an argument. Use RequiresArgs::No for no and RequiresArgs::Yes for yes.
-        void addOption(const std::string& optionName, const std::string& identifiers, const std::string& helpMessage, RequiresArgs requiresArgs)
+        void addOption(const std::string& optionName, const std::string& identifiers, const std::string& helpMessage, RequiresArg requiresArgs)
         {
             // Split the identifiers by the | character.
             std::vector<std::string> identifierList = split(identifiers, '|');
@@ -76,7 +76,7 @@ namespace iarglib
             option.name = optionName;
             option.identifiers = identifierList;
             option.description = helpMessage;
-            option.requiresArgs = requiresArgs;
+            option.requiresArg = requiresArgs;
 
             // Add the option to the map.
             options[optionName] = option;
@@ -92,7 +92,7 @@ namespace iarglib
         //     optionDescription - The description of the option, used when displaying help, and not required.
         //     requiresArgs - Whether the option requires an argument. Use RequiresArgs::No for no and RequiresArgs::Yes for yes.
         //     event - The function to execute when the option is passed in.
-        void addOptionEvent(const std::string& optionName, const std::string& identifier, const std::string& helpMessage, RequiresArgs requiresArgs, void (*eventFunction)(const IArger&))
+        void addOptionEvent(const std::string& optionName, const std::string& identifier, const std::string& helpMessage, RequiresArg requiresArgs, void (*eventFunction)(const IArger&))
         {
             // Split the identifiers by the | character.
             std::vector<std::string> identifierList = split(identifier, '|');
@@ -101,7 +101,7 @@ namespace iarglib
             option.name = optionName;
             option.identifiers = identifierList;
             option.description = helpMessage;
-            option.requiresArgs = requiresArgs;
+            option.requiresArg = requiresArgs;
             option.func = eventFunction;
 
             // Add the option to the map.
@@ -119,14 +119,15 @@ namespace iarglib
         void addHelpOption(const std::string& helpMessage)
         {
             usingAutoHelp = true;
-            addOptionEvent("help", "-h|--help", "Display this help message", RequiresArgs::No, printHelp);
+            addOptionEvent("help", "-h|--help", "Display this help message", RequiresArg::No, printHelp);
         }
 
         // Set the version of the app, and automatically display a version message when the version option is passed in.
         void addVersionOption(const std::string& version)
         {
             usingAutoVersion = true;
-            addOptionEvent("version", "-v|--version", "Display the version of this application", RequiresArgs::No, printVersion);
+            addOptionEvent("version", "-v|--version", "Display the version of this application", RequiresArg::No, printVersion);
+            this->version = version;
         }
 
         // Set if the program should continue executing after displaying help info.
@@ -153,6 +154,7 @@ namespace iarglib
         // Returns true if the program should continue executing, false if it should exit.
         bool parse()
         {
+            // MAPPING STAGE
             // Run through and map all option identifiers to their names.
             for (auto& option : options)
             {
@@ -163,6 +165,7 @@ namespace iarglib
             }
 
 
+            // PARSING STAGE
             int op = 1;
             while (op < argc)
             {
@@ -210,7 +213,7 @@ namespace iarglib
                 }
 
                 // If the option requires an argument, get the argument.
-                if (optionData.requiresArgs == RequiresArgs::Yes)
+                if (optionData.requiresArg == RequiresArg::Yes)
                 {
                     op++;
 
@@ -245,6 +248,7 @@ namespace iarglib
                 op++;
             }
 
+            // TRIGGERING STAGE
             // Run through each event option and trigger the event.
             for (auto& event : triggerEvents)
             {
@@ -275,6 +279,8 @@ namespace iarglib
         // Get app name.
         const std::string& getAppName() const { return appName; }
 
+        // Get app version.
+        const std::string& getAppVersion() const { return version; }
 
     private:
         // Arg count
@@ -290,6 +296,9 @@ namespace iarglib
 
         // The application name.
         std::string appName;
+
+        // The application version.
+        std::string version;
 
         // Unordered map of options. Key is the option name, value is the option struct.
         std::unordered_map<std::string, Option> options;

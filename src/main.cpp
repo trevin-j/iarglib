@@ -5,7 +5,7 @@
 #include "iarglib.hpp"
 
 using iarglib::IArger;
-using iarglib::RequiresArgs;
+using iarglib::RequiresArg;
 
 void exampleDoSomething(const IArger& arger)
 {
@@ -31,12 +31,12 @@ void setupOptions(IArger& arger)
     arger.setContinueOnVersion(false);
 
     // Add some manual options.
-    arger.addOption("file", "-f|--file", "Example option - The file to read", RequiresArgs::Yes);
-    arger.addOption("output", "-o|--output", "Example option - The file to write", RequiresArgs::Yes);
-    arger.addOption("size", "-S|--size", "Example option - The size of the output file", RequiresArgs::Yes);
-    arger.addOption("read", "-r|--read", "Example option - Read the file", RequiresArgs::No);
+    arger.addOption("file", "-f|--file", "Example option - The file to read", RequiresArg::Yes);
+    arger.addOption("output", "-o|--output", "Example option - The file to write", RequiresArg::Yes);
+    arger.addOption("size", "-S|--size", "Example option - The size of the output file", RequiresArg::Yes);
+    arger.addOption("read", "-r|--read", "Example option - Read the file", RequiresArg::No);
 
-    arger.addOptionEvent("do-something", "-d|--do-something", "Example option - An example of an event option", RequiresArgs::No, exampleDoSomething);
+    arger.addOptionEvent("do-something", "-d|--do-something", "Example option - An example of an event option", RequiresArg::No, exampleDoSomething);
 }
 
 int main(int argc, char** argv)
