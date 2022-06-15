@@ -2,6 +2,10 @@
 
 IArgLib is a header-only C++ library for parsing command line options. It is designed to simplify the process of dealing with command line arguments.
 
+IArgLib is very simple and currently only supports named options that you provide. It currently doesn't support positional args or optional arguments or any other special features.
+
+It is planned to support accepting a single positional argument as the first argument.
+
 # Features
 
 * Quick and easy to get started
