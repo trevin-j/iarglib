@@ -17,13 +17,12 @@ Here is a simple reference for everything contained in IArgLib.
     * [IArger::parse](#iargerparse)
     * [IArger::getPassedOptions](#iargergetpassedoptions)
     * [IArger::getAllOptions](#iargergetalloptions)
+    * [IArger::getOptionData](#iargergetoptiondata)
     * [IArger::optionExists](#iargeroptionexists)
     * [IArger::getOptionArgument](#iargergetoptionargument)
     * [IArger::getAppName](#iargergetappname)
     * [IArger::getAppVersion](#iargergetappversion)
 * [iarglib::Option](#iargliboption)
-* [iarglib::printHelp](#iarglibprinthelp)
-* [iarglib::printVersion](#iarglibprintversion)
 
 ### `iarglib::RequiresArg`
 
@@ -76,13 +75,21 @@ Arguments:
 
 `void IArger::addHelpOption(const std::string& helpMessage)`
 
+`void IArger::addHelpOption(const std::string& helpMessage, const std::string& postMessage)`
+
 This method is used to add the automatic help option. The help identifiers are `-h` and `--help`. The automatic help option uses the help message you supply, as well as the application name, and the help messages of each option to generate a help message. If you desire, you can manually create your own help option, and not use this method.
+
+The optional `postMessage` argument is used to display a message after the help message.
 
 #### `IArger::addVersionOption`
 
 `void IArger::addVersionOption(const std::string& version)`
 
+`void IArger::addVersionOption(const std::string& version, const std::string& postMessage)`
+
 This method is used to add the automatic version option. The version identifiers are `-v` and `--version`. The automatic version option uses the version and app name you supply to generate a version message. If you desire, you can manually create your own version option, and not use this method.
+
+The optional `postMessage` argument is used to display a message after the version message.
 
 #### `IArger::setContinueOnHelp`
 
@@ -120,6 +127,12 @@ This method can be used to get a vector of all the option names that were passed
 
 This method can be used to get a vector of all the option names that were added. Internally, this method is used to generate a help message.
 
+#### `IArger::getOptionData`
+
+`const option& IArger::getOptionData(const std::string& optionName) const`
+
+This method can be used to get the option data for a specific option.
+
 #### `IArger::optionExists`
 
 `bool IArger::optionExists(const std::string& optionName) const`
@@ -146,7 +159,7 @@ This method can be used to get the version that you specified. Internally, this 
 
 ### `iarglib::Option`
 
-The `Option` struct is used internally to store information about an option. External usage of this struct is unnecessary.
+The `Option` struct is used internally to store information about an option. Most often you will not need to use this struct.
 
 ```cpp
 namespace IArgLib {
@@ -160,15 +173,3 @@ namespace IArgLib {
     };
 }
 ```
-
-### `iarglib::printHelp`
-
-`void iarglib::printHelp(const IArger& arger)`
-
-This function is used as the automatic help function, if you use the built in help option. It will print the help message to the console.
-
-### `iarglib::printVersion`
-
-`void iarglib::printVersion(const IArger& arger)`
-
-This function is used as the automatic version function, if you use the built in version option. It will print the version message to the console.

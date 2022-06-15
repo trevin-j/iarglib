@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <unordered_map>
+#include <sstream>
 
 namespace iarglib
 {
@@ -116,18 +117,21 @@ namespace iarglib
 
         // Add a help option that prints the specified help message,
         // the application name, and automatically generates a help screen from the option descriptions.
-        void addHelpOption(const std::string& helpMessage)
+        void addHelpOption(const std::string& helpMessage, const std::string& postMessage="")
         {
             usingAutoHelp = true;
             addOptionEvent("help", "-h|--help", "Display this help message", RequiresArg::No, printHelp);
+            autoHelpText = helpMessage;
+            helpPostText = postMessage;
         }
 
         // Set the version of the app, and automatically display a version message when the version option is passed in.
-        void addVersionOption(const std::string& version)
+        void addVersionOption(const std::string& version, const std::string& postMessage="")
         {
             usingAutoVersion = true;
             addOptionEvent("version", "-v|--version", "Display the version of this application", RequiresArg::No, printVersion);
             this->version = version;
+            versionPostText = postMessage;
         }
 
         // Set if the program should continue executing after displaying help info.
@@ -264,6 +268,12 @@ namespace iarglib
         // Get all valid options.
         const std::vector<std::string>& getAllOptions() const { return allOptions; }
 
+        // Get the option data for the specified option.
+        const Option& getOptionData(const std::string& optionName) const
+        {
+            return options.at(optionName);
+        }
+
         // Check if a specific option was passed in.
         bool optionExists(const std::string& optionName) const
         {
@@ -282,6 +292,9 @@ namespace iarglib
         // Get app version.
         const std::string& getAppVersion() const { return version; }
 
+        // Get auto help text.
+        const std::string& getAutoHelpText() const { return autoHelpText; }
+
     private:
         // Arg count
         int argc;
@@ -299,6 +312,15 @@ namespace iarglib
 
         // The application version.
         std::string version;
+
+        // The help message
+        std::string autoHelpText;
+
+        // Help post message
+        std::string helpPostText;
+
+        // Version post message
+        std::string versionPostText;
 
         // Unordered map of options. Key is the option name, value is the option struct.
         std::unordered_map<std::string, Option> options;
@@ -335,21 +357,80 @@ namespace iarglib
             tokens.push_back(str);
             return tokens;
         }
+
+        static std::string getIdentifierString(const std::vector<std::string> identifiers, bool hasArg)
+        {
+            std::stringstream ss;
+            for (auto& identifier : identifiers)
+            {
+                ss << identifier;
+                if (hasArg)
+                    ss << " arg";
+                ss << ", ";
+            }
+            std::string asString = ss.str();
+            asString.erase(asString.size() - 2);
+            return asString;
+        }
+
+        static void printHelp(const IArger& arger)
+        {
+            // Go through each option and get the data for it, then determine which option has the longest identifier string.
+            int longestIdentifier = 0;
+            for (auto& option : arger.getAllOptions())
+            {
+                auto& optionData = arger.getOptionData(option);
+                std::string identifierString = getIdentifierString(optionData.identifiers, optionData.requiresArg == RequiresArg::Yes);
+                if (identifierString.size() > longestIdentifier)
+                {
+                    longestIdentifier = identifierString.size();
+                }
+            }
+
+            // Spacing will be longest identifier + 3.
+            int spacing = longestIdentifier + 3;
+
+            // Print the initial help message.
+            std::cout << std::endl;
+            std::cout << "** Help menu for " << arger.appName << " version " << arger.version << " **" << std::endl;
+            std::cout << arger.getAutoHelpText() << std::endl;
+            std::cout << std::endl;
+            std::cout << "Options:" << std::endl;
+
+            // Go through each option and get the data for it, then print it.
+            for (auto& option : arger.getAllOptions())
+            {
+                auto& optionData = arger.getOptionData(option);
+                std::string identifierString = getIdentifierString(optionData.identifiers, optionData.requiresArg == RequiresArg::Yes);
+                std::cout << "  " << identifierString << std::string(spacing - identifierString.size(), ' ') << optionData.description << std::endl;
+            }
+
+            std::cout << std::endl;
+
+            // Print the help post message if it exists.
+            if (arger.helpPostText.size() > 0)
+            {
+                std::cout << arger.helpPostText << std::endl;
+                std::cout << std::endl;
+            }
+        }
+
+        static void printVersion(const IArger& arger)
+        {
+            // Print app name and version
+            std::cout << "** " << arger.appName << " version " << arger.version << " **" << std::endl;
+        
+            // Print version post message if it exists.
+            if (arger.versionPostText.size() > 0)
+            {
+                std::cout << arger.versionPostText << std::endl;
+                std::cout << std::endl;
+            }
+        }
     };
 
-    void printHelp(const IArger& arger)
-    {
-        std::cout << "Help: " << arger.getAppName() << std::endl;
-        for (auto& option : arger.getAllOptions())
-        {
-            std::cout << "  " << option << std::endl;
-        }
-    }
 
-    void printVersion(const IArger& arger)
-    {
-        std::cout << "Version: " << arger.getAppName() << std::endl;
-    }
+
 }
 
 #endif

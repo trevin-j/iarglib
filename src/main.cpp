@@ -21,8 +21,8 @@ void setupOptions(IArger& arger)
     // If added through this method, help and version messages are automatically generated and handled.
     // You can also add help and version options manually using addOption() or addOptionEvent().
     // With these special options, if continueOnHelp is false, every option beside help or version is ignored, even invalid options.
-    arger.addHelpOption("This IArgLib example shows how to use the IArger class to parse command line arguments.");
-    arger.addVersionOption("1.0.0");
+    arger.addHelpOption("This IArgLib example shows how to use the IArger class to parse command line arguments.", "Check out the source code at https://github.com/trevin-j/iarglib");
+    arger.addVersionOption("1.0.0", "Check out the source code at https://github.com/trevin-j/iarglib");
 
     // If using built-in help and version options, you can specify if you want the program to continue after displaying help or version info.
     // These default to true so that you have to be aware that false will force the parser to stop after displaying help or version info,
